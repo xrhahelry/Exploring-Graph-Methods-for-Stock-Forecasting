@@ -1,6 +1,8 @@
 import networkx as nx
 import numpy as np
 import torch
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 from torch_geometric.utils.convert import from_networkx
@@ -40,6 +42,8 @@ def visibility_graph(data, value, window_size=30, step_size=1, batch_size=7):
         graph = Data(x=x, edge_index=edge_index, y=y)
         graphs.append(graph)
 
-    graph_loader = DataLoader(graphs, batch_size=batch_size, shuffle=True)
+    train, test = train_test_split(graphs, test_size=0.2, random_state=12)
+    train_loader = DataLoader(train, batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(test, batch_size=batch_size, shuffle=False)
 
-    return graph_loader
+    return train_loader, test_loader
