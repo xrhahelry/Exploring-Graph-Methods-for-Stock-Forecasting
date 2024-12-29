@@ -12,14 +12,15 @@ cols = df.columns
 scaler = StandardScaler()
 data = scaler.fit_transform(df)
 df = pd.DataFrame(data, columns=cols)
-train_graphs, test_graphs = pp.visibility_graph(
+
+train_graphs, val_graphs = pp.visibility_graph(
     data=df, value="open", window_size=30, step_size=20
 )
 
 input_size = 7
 hidden_size = 64
 output_size = 7
-epochs = 100
+epochs = 500
 learning_rate = 1e-3
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -40,14 +41,12 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
         total_loss += loss.item()
-    print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.item():.4f}")
-
-print(f"Total Loss: {total_loss}")
+    print(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss:.4f}")
 
 model.eval()
 predictions = []
 ground_truth = []
-for batch in test_graphs:
+for batch in val_graphs:
     batch = batch.to(device)
     with torch.no_grad():
         output = model(batch.x, batch.edge_index, batch.batch)
@@ -64,13 +63,4 @@ mae = mean_absolute_error(ground_truth, predictions)
 print(f"Mean Squared Error (MSE): {mse:.4f}")
 print(f"Mean Absolute Error (MAE): {mae:.4f}")
 
-predictions = predictions.reshape(-1, 7)
-ground_truth = ground_truth.reshape(-1, 7)
-
-predictions = scaler.inverse_transform(predictions)
-ground_truth = scaler.inverse_transform(ground_truth)
-
-prd = pd.DataFrame(predictions, columns=cols)
-prd.to_csv("../predictions.csv", index=False)
-gdt = pd.DataFrame(ground_truth, columns=cols)
-gdt.to_csv("../ground_truth.csv", index=False)
+torch.save(model.state_dict(), "./gcn/gcn.pth")
