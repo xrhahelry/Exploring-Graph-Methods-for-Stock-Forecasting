@@ -7,7 +7,7 @@ import torch.nn as nn
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("./data/nabil.csv")
+df = pd.read_csv("../nabil.csv")
 cols = df.columns
 scaler = StandardScaler()
 data = scaler.fit_transform(df)
@@ -71,6 +71,6 @@ predictions = scaler.inverse_transform(predictions)
 ground_truth = scaler.inverse_transform(ground_truth)
 
 prd = pd.DataFrame(predictions, columns=cols)
-prd.to_csv("./gcn/predictions.csv", index=False)
+prd.to_csv("../predictions.csv", index=False)
 gdt = pd.DataFrame(ground_truth, columns=cols)
-gdt.to_csv("./gcn/ground_truth.csv", index=False)
+gdt.to_csv("../ground_truth.csv", index=False)
