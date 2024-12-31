@@ -7,7 +7,9 @@ import torch.nn as nn
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.preprocessing import StandardScaler
 
-df = pd.read_csv("./data/nabil.csv")
+df = pd.read_csv(
+    "./data/fundamental data/commercial bank/Nabil Bank Limited ( NABIL ).csv"
+)
 cols = df.columns
 scaler = StandardScaler()
 data = scaler.fit_transform(df)
@@ -21,7 +23,7 @@ input_size = 7
 hidden_size = 64
 output_size = 7
 epochs = 500
-learning_rate = 1e-3
+learning_rate = 1e-2
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = NN.GCN(input_size, hidden_size, output_size)
