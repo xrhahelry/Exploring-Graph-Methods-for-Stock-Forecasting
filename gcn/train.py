@@ -1,3 +1,5 @@
+import json
+
 import nn as NN
 import numpy as np
 import pandas as pd
@@ -5,25 +7,50 @@ import preprocess as pp
 import torch
 import torch.nn as nn
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from torch_geometric.loader import DataLoader
 
-df = pd.read_csv(
-    "./data/fundamental data/commercial bank/Nabil Bank Limited ( NABIL ).csv"
-)
-cols = df.columns
-scaler = StandardScaler()
-data = scaler.fit_transform(df)
-df = pd.DataFrame(data, columns=cols)
+make_new_graph = True
+window_size = 30
+step_size = 20
+vis_col = "close"
+batch_size = 32
 
-train_graphs, val_graphs = pp.visibility_graph(
-    data=df, value="open", window_size=30, step_size=20
-)
+if make_new_graph:
+    with open("./gcn/stocks.json") as json_file:
+        stock_paths = json.load(json_file)
+        predict_path = stock_paths["predict"]
+        other_paths = stock_paths["other"]
+
+    predictee = pd.read_csv(f"./data/{predict_path}")
+    stocks = [pd.read_csv(f"./data/{path}") for path in other_paths]
+
+    scaler = StandardScaler()
+
+    predictee = pp.prepare_stock(predictee, scaler)
+    start_date = predictee.index[0]
+    stocks = [pp.prepare_stocks(stock, start_date, scaler) for stock in stocks]
+
+    train_graphs, val_graphs = pp.create_graphs(
+        predictee,
+        stocks,
+        vis_col=vis_col,
+        window_size=window_size,
+        step_size=step_size,
+        batch_size=batch_size,
+    )
+else:
+    graphs = torch.load("./gcn/graphs.pt", weights_only=False)
+    train, val = train_test_split(graphs, test_size=0.2, random_state=12)
+    train_graphs = DataLoader(train, batch_size=batch_size, shuffle=True)
+    val_graphs = DataLoader(val, batch_size=batch_size, shuffle=False)
 
 input_size = 7
 hidden_size = 64
-output_size = 7
-epochs = 500
-learning_rate = 1e-2
+output_size = 1
+epochs = 100
+learning_rate = 1e-3
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = NN.GCN(input_size, hidden_size, output_size)
