@@ -1,4 +1,4 @@
-import nn as NN
+import nn2 as NN
 import numpy as np
 import pandas as pd
 import preprocess as pp
@@ -24,7 +24,7 @@ epochs = 500
 learning_rate = 1e-3
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = NN.GCN(input_size, hidden_size, output_size)
+model = NN.GAT(input_size, hidden_size, output_size)
 model = model.to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 ls_fn = nn.MSELoss()
@@ -35,7 +35,7 @@ for epoch in range(epochs):
     for batch in train_graphs:
         batch = batch.to(device)
         optimizer.zero_grad()
-        output = model(batch.x, batch.edge_index, batch.batch)
+        output = model(batch.x, batch.edge_index, batch.edge_weight, batch.batch)
         output = output.view(-1)
         loss = ls_fn(output, batch.y)
         loss.backward()
@@ -49,7 +49,7 @@ ground_truth = []
 for batch in val_graphs:
     batch = batch.to(device)
     with torch.no_grad():
-        output = model(batch.x, batch.edge_index, batch.batch)
+        output = model(batch.x, batch.edge_index,batch.edge_weight, batch.batch)
         output = output.view(-1)
         predictions.append(output.cpu().numpy())
         ground_truth.append(batch.y.cpu().numpy())
@@ -63,4 +63,4 @@ mae = mean_absolute_error(ground_truth, predictions)
 print(f"Mean Squared Error (MSE): {mse:.4f}")
 print(f"Mean Absolute Error (MAE): {mae:.4f}")
 
-torch.save(model.state_dict(), "./gcn/gcn.pth")
+torch.save(model.state_dict(), "gat.pth")
