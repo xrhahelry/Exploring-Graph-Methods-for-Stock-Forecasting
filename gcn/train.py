@@ -9,12 +9,12 @@ import torch
 import torch.nn as nn
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+import joblib
 from torch_geometric.loader import DataLoader
 
 make_new_graph = True
 window_size = 30
-step_size = 20
+step_size = 3
 vis_col = "close"
 batch_size = 32
 
@@ -28,37 +28,19 @@ if make_new_graph:
     targets = predictee["close"]
     stocks = [pd.read_csv(f"./data/{path}") for path in other_paths]
 
-    scaler = StandardScaler()
+    scaler = joblib.load("./gcn/scaler.pkl")
 
     predictee = pp.prepare_stock(predictee, scaler)
     start_date = predictee.index[0]
     stocks = [pp.prepare_stocks(stock, start_date, scaler) for stock in stocks]
 
-    train_predictee = predictee[predictee.index < "2024-10-29"]
-    train_stocks = [[stock[stock.index < "2024-10-29"]] for stock in stocks]
-    train_targets = targets[:-37]
-
-    test_predictee = predictee[predictee.index >= "2024-10-29"]
-    test_stocks = [stock[stock.index >= "2024-10-29"] for stock in stocks]
-    test_targets = targets[-37:]
-
     train_graphs, val_graphs = pp.create_graphs(
-        train_predictee,
-        train_stocks,
-        train_targets,
+        predictee,
+        stocks,
         vis_col=vis_col,
         window_size=window_size,
         step_size=step_size,
         batch_size=batch_size,
-    )
-
-    test_graphs = gc.create_graphs(
-        test_predictee,
-        test_stocks,
-        test_targets,
-        vis_col=vis_col,
-        window_size=window_size,
-        step_size=1,
     )
 else:
     graphs = torch.load("./gcn/graphs.pt", weights_only=False)
@@ -66,50 +48,50 @@ else:
     train_graphs = DataLoader(train, batch_size=batch_size, shuffle=True)
     val_graphs = DataLoader(val, batch_size=batch_size, shuffle=False)
 
-input_size = 7
-hidden_size = 64
-output_size = 7
-epochs = 100
-learning_rate = 1e-3
+# input_size = 7
+# hidden_size = 512
+# output_size = 123
+# epochs = 100
+# learning_rate = 1e-3
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = NN.GCN(input_size, hidden_size, output_size)
-model = model.to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-ls_fn = nn.MSELoss()
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# model = NN.GCN(input_size, hidden_size, output_size)
+# model = model.to(device)
+# optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+# ls_fn = nn.MSELoss()
 
-model.train()
-for epoch in range(epochs):
-    total_loss = 0
-    for batch in train_graphs:
-        batch = batch.to(device)
-        optimizer.zero_grad()
-        output = model(batch.x, batch.edge_index, batch.batch)
-        output = output.view(-1)
-        loss = ls_fn(output, batch.y)
-        loss.backward()
-        optimizer.step()
-        total_loss += loss.item()
-    print(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss:.4f}")
+# model.train()
+# for epoch in range(epochs):
+#     total_loss = 0
+#     for batch in train_graphs:
+#         batch = batch.to(device)
+#         optimizer.zero_grad()
+#         output = model(batch.x, batch.edge_index, batch.batch)
+#         output = output.view(-1)
+#         loss = ls_fn(output, batch.y)
+#         loss.backward()
+#         optimizer.step()
+#         total_loss += loss.item()
+#     print(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss:.4f}")
 
-model.eval()
-predictions = []
-ground_truth = []
-for batch in val_graphs:
-    batch = batch.to(device)
-    with torch.no_grad():
-        output = model(batch.x, batch.edge_index, batch.batch)
-        output = output.view(-1)
-        predictions.append(output.cpu().numpy())
-        ground_truth.append(batch.y.cpu().numpy())
+# model.eval()
+# predictions = []
+# ground_truth = []
+# for batch in val_graphs:
+#     batch = batch.to(device)
+#     with torch.no_grad():
+#         output = model(batch.x, batch.edge_index, batch.batch)
+#         output = output.view(-1)
+#         predictions.append(output.cpu().numpy())
+#         ground_truth.append(batch.y.cpu().numpy())
 
-predictions = np.concatenate(predictions, axis=0)
-ground_truth = np.concatenate(ground_truth, axis=0)
+# predictions = np.concatenate(predictions, axis=0)
+# ground_truth = np.concatenate(ground_truth, axis=0)
 
-mse = mean_squared_error(ground_truth, predictions)
-mae = mean_absolute_error(ground_truth, predictions)
+# mse = mean_squared_error(ground_truth, predictions)
+# mae = mean_absolute_error(ground_truth, predictions)
 
-print(f"Mean Squared Error (MSE): {mse:.4f}")
-print(f"Mean Absolute Error (MAE): {mae:.4f}")
+# print(f"Mean Squared Error (MSE): {mse:.4f}")
+# print(f"Mean Absolute Error (MAE): {mae:.4f}")
 
-torch.save(model.state_dict(), "./gcn/gcn.pth")
+# torch.save(model.state_dict(), "./gcn/gcn.pth")

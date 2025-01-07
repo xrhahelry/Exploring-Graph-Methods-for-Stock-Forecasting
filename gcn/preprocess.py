@@ -7,7 +7,6 @@ from sklearn.preprocessing import StandardScaler
 from torch_geometric.loader import DataLoader
 
 
-@track_execution
 def prepare_stocks(df, start_date, scaler):
     df = df.drop(columns=["status"])
     # df["per_change"] = df["per_change"].fillna(0)
@@ -20,12 +19,11 @@ def prepare_stocks(df, start_date, scaler):
         df = df.fillna(df.mean())
     og_index = df.index
     cols = df.columns
-    data = scaler.fit_transform(df)
+    data = scaler.transform(df)
     df = pd.DataFrame(data, columns=cols, index=og_index)
     return df
 
 
-@track_execution
 def prepare_stock(df, scaler):
     df = df.drop(columns=["status"])
     # df["per_change"] = df["per_change"].fillna(0)
@@ -37,23 +35,21 @@ def prepare_stock(df, scaler):
         df = df.fillna(df.mean())
     og_index = df.index
     cols = df.columns
-    data = scaler.fit_transform(df)
+    data = scaler.transform(df)
     df = pd.DataFrame(data, columns=cols, index=og_index)
     return df
 
 
-@track_execution
 def create_graphs(
     predictee,
     stocks,
-    targets,
     vis_col="close",
     window_size=30,
     step_size=20,
     batch_size=32,
 ):
     graphs = gc.create_graphs(
-        predictee, stocks, targets, vis_col="close", window_size=30, step_size=20
+        predictee, stocks, vis_col=vis_col, window_size=window_size, step_size=step_size
     )
 
     train, val = train_test_split(graphs, test_size=0.2, random_state=12)
