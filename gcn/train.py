@@ -11,44 +11,29 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch_geometric.loader import DataLoader
 
-make_new_graph = True
+make_new_graph = False
 window_size = 30
 step_size = 20
 vis_col = "close"
-batch_size = 32
+batch_size = 7
 
 if make_new_graph:
-    with open("./gcn/stocks.json") as json_file:
-        stock_paths = json.load(json_file)
-        predict_path = stock_paths["predict"]
-        other_paths = stock_paths["other"]
-
-    predictee = pd.read_csv(f"./data/{predict_path}")
-    stocks = [pd.read_csv(f"./data/{path}") for path in other_paths]
-
     scaler = StandardScaler()
-
-    predictee = pp.prepare_stock(predictee, scaler)
-    start_date = predictee.index[0]
-    stocks = [pp.prepare_stocks(stock, start_date, scaler) for stock in stocks]
+    df = pd.read_csv("./data/fundamental data/commercial bank/NABIL.csv")
+    df = pp.prepare_stock(df, scaler)
 
     train_graphs, val_graphs = pp.create_graphs(
-        predictee,
-        stocks,
-        vis_col=vis_col,
-        window_size=window_size,
-        step_size=step_size,
-        batch_size=batch_size,
+        df, vis_col, window_size, step_size, batch_size
     )
 else:
-    graphs = torch.load("./gcn/graphs.pt", weights_only=False)
+    graphs = torch.load("./gcn/graphs.pt")
     train, val = train_test_split(graphs, test_size=0.2, random_state=12)
     train_graphs = DataLoader(train, batch_size=batch_size, shuffle=True)
     val_graphs = DataLoader(val, batch_size=batch_size, shuffle=False)
 
 input_size = 7
-hidden_size = 64
-output_size = 1
+hidden_size = 512
+output_size = 7
 epochs = 100
 learning_rate = 1e-3
 
@@ -91,5 +76,3 @@ mae = mean_absolute_error(ground_truth, predictions)
 
 print(f"Mean Squared Error (MSE): {mse:.4f}")
 print(f"Mean Absolute Error (MAE): {mae:.4f}")
-
-torch.save(model.state_dict(), "./gcn/gcn.pth")
