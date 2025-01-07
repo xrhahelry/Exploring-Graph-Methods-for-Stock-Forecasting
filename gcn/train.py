@@ -1,5 +1,6 @@
 import json
 
+import graph_creation as gc
 import nn as NN
 import numpy as np
 import pandas as pd
@@ -24,6 +25,7 @@ if make_new_graph:
         other_paths = stock_paths["other"]
 
     predictee = pd.read_csv(f"./data/{predict_path}")
+    targets = predictee["close"]
     stocks = [pd.read_csv(f"./data/{path}") for path in other_paths]
 
     scaler = StandardScaler()
@@ -32,13 +34,31 @@ if make_new_graph:
     start_date = predictee.index[0]
     stocks = [pp.prepare_stocks(stock, start_date, scaler) for stock in stocks]
 
+    train_predictee = predictee[predictee.index < "2024-10-29"]
+    train_stocks = [[stock[stock.index < "2024-10-29"]] for stock in stocks]
+    train_targets = targets[:-37]
+
+    test_predictee = predictee[predictee.index >= "2024-10-29"]
+    test_stocks = [stock[stock.index >= "2024-10-29"] for stock in stocks]
+    test_targets = targets[-37:]
+
     train_graphs, val_graphs = pp.create_graphs(
-        predictee,
-        stocks,
+        train_predictee,
+        train_stocks,
+        train_targets,
         vis_col=vis_col,
         window_size=window_size,
         step_size=step_size,
         batch_size=batch_size,
+    )
+
+    test_graphs = gc.create_graphs(
+        test_predictee,
+        test_stocks,
+        test_targets,
+        vis_col=vis_col,
+        window_size=window_size,
+        step_size=1,
     )
 else:
     graphs = torch.load("./gcn/graphs.pt", weights_only=False)
@@ -48,7 +68,7 @@ else:
 
 input_size = 7
 hidden_size = 64
-output_size = 1
+output_size = 7
 epochs = 100
 learning_rate = 1e-3
 

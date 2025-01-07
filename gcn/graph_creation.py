@@ -7,11 +7,12 @@ from torch_geometric.utils.convert import from_networkx
 
 
 @track_execution
-def create_graphs(predictee, stocks, vis_col="close", window_size=30, step_size=20):
+def create_graphs(
+    predictee, stocks, predict_values, vis_col="close", window_size=30, step_size=20
+):
     l = len(predictee)
     predict_frames = []
     predict_dates = predictee.index
-    predict_values = predictee["close"].values
     stocks_frames = []
     targets = []
 
@@ -20,7 +21,7 @@ def create_graphs(predictee, stocks, vis_col="close", window_size=30, step_size=
         end = i + window_size
         if end > l:
             predict_frames.append(predictee[l - window_size - 1 : l - 1])
-            targets.append(predict_values[l - 1])
+            targets.append(predict_values[l - 8 : l - 1])
 
             start_date = predict_dates[l - window_size - 1]
             end_date = predict_dates[l - 2]
@@ -34,7 +35,7 @@ def create_graphs(predictee, stocks, vis_col="close", window_size=30, step_size=
             break
 
         predict_frames.append(predictee[i:end])
-        targets.append(predict_values[end])
+        targets.append(predict_values[end - 7 : end])
 
         start_date = predict_dates[i]
         end_date = predict_dates[end - 1]

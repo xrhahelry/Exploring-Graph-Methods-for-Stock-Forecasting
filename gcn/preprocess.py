@@ -44,10 +44,16 @@ def prepare_stock(df, scaler):
 
 @track_execution
 def create_graphs(
-    predictee, stocks, vis_col="close", window_size=30, step_size=20, batch_size=32
+    predictee,
+    stocks,
+    targets,
+    vis_col="close",
+    window_size=30,
+    step_size=20,
+    batch_size=32,
 ):
     graphs = gc.create_graphs(
-        predictee, stocks, vis_col="close", window_size=30, step_size=20
+        predictee, stocks, targets, vis_col="close", window_size=30, step_size=20
     )
 
     train, val = train_test_split(graphs, test_size=0.2, random_state=12)
