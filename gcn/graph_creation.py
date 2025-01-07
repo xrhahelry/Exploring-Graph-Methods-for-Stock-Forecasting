@@ -120,6 +120,7 @@ def create_graphs(predictee, stocks, vis_col="close", window_size=30, step_size=
                 for node1 in nodes_in_main:
                     for node2 in nodes_in_stock:
                         new_edge_index.append([node1.item(), node2.item() + offset])
+                        new_edge_index.append([node2.item(), node1.item() + offset])
 
             new_edge_index = (
                 torch.tensor(new_edge_index, dtype=torch.int).t().contiguous()
