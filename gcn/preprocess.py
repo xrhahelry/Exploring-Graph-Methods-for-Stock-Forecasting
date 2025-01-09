@@ -21,6 +21,7 @@ def prepare_stocks(df, start_date, scaler):
     cols = df.columns
     data = scaler.transform(df)
     df = pd.DataFrame(data, columns=cols, index=og_index)
+    df = df[df.index < "2022-04-25"]
     return df
 
 
@@ -37,6 +38,7 @@ def prepare_stock(df, scaler):
     cols = df.columns
     data = scaler.transform(df)
     df = pd.DataFrame(data, columns=cols, index=og_index)
+    df = df[df.index < "2022-04-25"]
     return df
 
 
