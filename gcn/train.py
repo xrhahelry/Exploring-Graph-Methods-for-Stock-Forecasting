@@ -1,6 +1,8 @@
 import json
+import time
 
 import graph_creation as gc
+import joblib
 import nn as NN
 import numpy as np
 import pandas as pd
@@ -9,8 +11,8 @@ import torch
 import torch.nn as nn
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from sklearn.model_selection import train_test_split
-import joblib
 from torch_geometric.loader import DataLoader
+from tqdm import tqdm
 
 make_new_graph = True
 window_size = 30
@@ -62,8 +64,10 @@ else:
 
 # model.train()
 # for epoch in range(epochs):
+#     start_time = time.time()
 #     total_loss = 0
-#     for batch in train_graphs:
+#
+#     for batch in tqdm(train_graphs, desc=f"Epoch {epoch + 1}/{epochs}"):
 #         batch = batch.to(device)
 #         optimizer.zero_grad()
 #         output = model(batch.x, batch.edge_index, batch.batch)
@@ -72,7 +76,12 @@ else:
 #         loss.backward()
 #         optimizer.step()
 #         total_loss += loss.item()
-#     print(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss:.4f}")
+#
+#     end_time = time.time()
+#     epoch_duration = end_time - start_time
+#     print(
+#         f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss:.4f}, Time: {epoch_duration:.2f}s"
+#     )
 
 # model.eval()
 # predictions = []
