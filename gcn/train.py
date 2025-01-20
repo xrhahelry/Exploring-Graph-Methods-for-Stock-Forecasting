@@ -11,11 +11,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torch_geometric.loader import DataLoader
 
-make_new_graph = False
+make_new_graph = True
 window_size = 30
-step_size = 20
+step_size = 3
 vis_col = "close"
-batch_size = 7
+batch_size = 32
 
 if make_new_graph:
     scaler = StandardScaler()
@@ -26,7 +26,7 @@ if make_new_graph:
         df, vis_col, window_size, step_size, batch_size
     )
 else:
-    graphs = torch.load("./gcn/graphs.pt")
+    graphs = torch.load("./gcn/graphs/.pt")
     train, val = train_test_split(graphs, test_size=0.2, random_state=12)
     train_graphs = DataLoader(train, batch_size=batch_size, shuffle=True)
     val_graphs = DataLoader(val, batch_size=batch_size, shuffle=False)
