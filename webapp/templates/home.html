@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Date and Time Section -->
+    <div class="text-left mb-4">
+        <h1>Bank Stock Prediction</h1>
+        <p id="currentDateTime" class="text-muted">As of <span id="liveDateTime"></span></p>
+        
+        <!-- Form to select bank and model -->
+        <form method="get" action="/">
+            <div class="form-group">
+                <label for="bank">Select Bank:</label>
+                <select name="bank" id="bank" class="form-control" onchange="this.form.submit()">
+                    <option value="NABIL" {% if bank == "NABIL" %}selected{% endif %}>NABIL</option>
+                    <option value="ADBL" {% if bank == "ADBL" %}selected{% endif %}>ADBL</option>
+                    <option value="NMB" {% if bank == "NMB" %}selected{% endif %}>NMB</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="model">Select Model:</label>
+                <select name="model" id="model" class="form-control" onchange="this.form.submit()">
+                    <option value="GCN" {% if model == "GCN" %}selected{% endif %}>GCN</option>
+                    <option value="GAT" {% if model == "GAT" %}selected{% endif %}>GAT</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- Legend for Graph Colors -->
+    <div class="text-center mb-4">
+        <p class="text-muted">Blue: Ground Truth | Orange: Predicted Values</p>
+    </div>
+
+    <!-- Prediction Graphs -->
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Graph 1: Open Price -->
+            <div id="graph1" class="graph-container" style="width: 100%; height: auto;">
+                {{ graphs[0] | safe }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <!-- Graph 2: High Price -->
+            <div id="graph2" class="graph-container" style="width: 100%; height: auto;">
+                {{ graphs[1] | safe }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Graph 3: Low Price -->
+            <div id="graph3" class="graph-container" style="width: 100%; height: auto;">
+                {{ graphs[2] | safe }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <!-- Graph 4: Close Price -->
+            <div id="graph4" class="graph-container" style="width: 100%; height: auto;">
+                {{ graphs[3] | safe }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Graph 5: Per_change -->
+            <div id="graph5" class="graph-container" style="width: 100%; height: auto;">
+                {{ graphs[4] | safe }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <!-- Graph 6: Traded Quantity -->
+            <div id="graph6" class="graph-container" style="width: 100%; height: auto;">
+                {{ graphs[5] | safe }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Graph 7: Traded Amount -->
+            <div id="graph7" class="graph-container" style="width: 100%; height: auto;">
+                {{ graphs[6] | safe }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include custom JavaScript -->
+<script src="{{ url_for('static', path='scripts.js') }}"></script>
+{% endblock %}

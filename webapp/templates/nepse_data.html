@@ -1,0 +1,48 @@
+<!-- templates/nepse_data.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>NEPSE Data</h1>
+
+    <!-- Loop through categories -->
+    {% for category_name, category_tables in categories.items() %}
+    <div class="category">
+        <div class="category-header" onclick="toggleCategory('{{ category_name|lower|replace(' ', '-') }}')">
+            <div class="icon">
+                🏦 <!-- Icon for the category -->
+            </div>
+            <div class="category-name">
+                {{ category_name }}
+            </div>
+        </div>
+
+        <!-- List of Tables (Initially Hidden) -->
+        <div id="{{ category_name|lower|replace(' ', '-') }}" class="table-list" style="display: none;">
+            {% for table in category_tables %}
+            <a href="/tables/{{ table }}" class="table-icon">
+                <div class="icon">
+                    📊 <!-- Icon for each table -->
+                </div>
+                <div class="table-name">
+                    {{ table }}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- JavaScript to Toggle Category Visibility -->
+<script>
+    function toggleCategory(categoryId) {
+        const category = document.getElementById(categoryId);
+        if (category.style.display === "none") {
+            category.style.display = "flex";
+        } else {
+            category.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}
