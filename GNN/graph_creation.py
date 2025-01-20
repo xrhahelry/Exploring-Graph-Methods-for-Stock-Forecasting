@@ -7,7 +7,9 @@ from torch_geometric.utils.convert import from_networkx
 
 
 @track_execution
-def create_graphs(data, vis_col, window_size=30, step_size=1, batch_size=7):
+def create_graphs(
+    data, vis_col, window_size=30, step_size=1, batch_size=7, graph_name="graphs.pt"
+):
     frames = []
     vis_frames = []
     targets = []
@@ -41,4 +43,5 @@ def create_graphs(data, vis_col, window_size=30, step_size=1, batch_size=7):
         graph = Data(x=x, edge_index=edge_index, y=y)
         graphs.append(graph)
 
+    torch.save(graphs, f"./GNN/graphs/{graph_name}.pt")
     return graphs
