@@ -27,7 +27,6 @@ if make_new_graph:
         other_paths = stock_paths["other"]
 
     predictee = pd.read_csv(f"./data/{predict_path}")
-    targets = predictee["close"]
     stocks = [pd.read_csv(f"./data/{path}") for path in other_paths]
 
     scaler = joblib.load("./gcn/scaler.pkl")

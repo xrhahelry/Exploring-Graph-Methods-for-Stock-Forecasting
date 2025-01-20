@@ -57,7 +57,7 @@ def create_graphs(predictee, stocks, vis_col="close", window_size=30, step_size=
             frame = frame[frame.index <= end_date]
 
             temp = stock[stock.index > end_date]
-            temp = temp[temp.index <= end_date + pd.DateOffset(days=7)]
+            temp = temp[temp.index <= end_date + pd.DateOffset(days=30)]
 
             if not temp["close"].empty:
                 t = frame["close"].to_list()
