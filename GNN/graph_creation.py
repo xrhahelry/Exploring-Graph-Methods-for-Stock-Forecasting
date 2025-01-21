@@ -28,7 +28,7 @@ def create_graphs(
 
         frames.append(values[i:end])
         vis_frames.append(vis_col[i:end])
-        targets.append(values[end])c
+        targets.append(values[end])
 
     ll = len(frames)
     graphs = []
@@ -41,12 +41,19 @@ def create_graphs(
         edge_index = temp.edge_index
 
         edge_index, _ = remove_self_loops(edge_index)
-        edge_weight = torch.tensor([abs(vis[u] - vis[v]) for u, v in G.edges() if u!=v], dtype=torch.float)
+        
+        # Add edge weights (absolute difference between node values)
+        edge_weight = torch.tensor([abs(vis[u] - vis[v]) for u, v in G.edges()], dtype=torch.float)
+        edge_weight = torch.cat([edge_weight, edge_weight])
+
+        print(f"Number of edges:  {len(G.edges())}")
+        print(f"Edges index shape:  {edge_index.shape}")
+        print(f"Edge weight shape:  {edge_weight.shape}")
 
         x = torch.tensor(frame, dtype=torch.float)
         y = torch.tensor(target, dtype=torch.float)
         graph = Data(x=x, edge_index=edge_index, edge_weight=edge_weight, y=y)
         graphs.append(graph)
 
-    torch.save(graphs, f"./GNN/graphs/{graph_name}.pt")
+    torch.save(graphs, f"./graphs/{graph_name}.pt")
     return graphs
