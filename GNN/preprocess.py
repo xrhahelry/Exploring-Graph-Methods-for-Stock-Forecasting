@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 from decorators import track_execution
+import graph_creation as gc
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from torch_geometric.loader import DataLoader
 
 
 def prepare_stocks(df, start_date, scaler):
@@ -45,10 +49,15 @@ def create_graphs(
     window_size=30,
     step_size=20,
     batch_size=32,
-    graph_name
+    graph_name="graphs.pt",
 ):
     graphs = gc.create_graphs(
-        predictee, stocks, vis_col=vis_col, window_size=window_size, step_size=step_size, graph_name=graph_name
+        predictee,
+        stocks,
+        vis_col=vis_col,
+        window_size=window_size,
+        step_size=step_size,
+        graph_name=graph_name,
     )
 
     train, val = train_test_split(graphs, test_size=0.2, random_state=12)
