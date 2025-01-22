@@ -9,13 +9,13 @@ def single():
     step_size = 3
     vis_col = "close"
     batch_size = 32
-    graph_name = "mrg_nib"
+    graph_name = "cb_nabil_wt_test"
 
-    scaler = joblib.load("./GNN/scalers/mrg_nib.pkl")
-    df = pd.read_csv("./data/fundamental data/merged share/NIB.csv")
+    scaler = joblib.load("./scalers/cb_nabil.pkl")
+    df = pd.read_csv("../data/fundamental data/commercial bank/NABIL.csv")
     df = pp.prepare_stock(df, scaler)
 
-    gc.create_graphs_singular(df, vis_col, window_size, step_size, graph_name)
+    gc.create_graphs_singular(df, vis_col, window_size, step_size, graph_name=graph_name)
 
 def sector():
     make_new_graph = True
@@ -41,8 +41,12 @@ def sector():
     gc.create_graphs(
         predictee,
         stocks,
+        graph_name,
         vis_col=vis_col,
         window_size=window_size,
         step_size=step_size,
-        graph_name=graph_name
+        
     )
+
+if __name__=="__main__":
+    single()

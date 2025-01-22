@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 import plotly.io as pio
 
 # Load the scaler
-scaler = joblib.load('models/scaler.pkl')
+scaler = joblib.load('../GNN/scalers/cb_nabil.pkl')
 
 # Load the trained model
 def load_model(model_path, input_size, hidden_size, output_size, model_type):
@@ -68,86 +68,62 @@ def generate_predictions(model, graphs, df, model_type):
     
     return predictions_df, ground_truth_df
 
-def visualize_results(predictions_df, ground_truth_df, feature_columns):
-    graphs = []
-    for col in feature_columns:
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=ground_truth_df['published_date'], 
-            y=ground_truth_df[col], 
-            mode='lines+markers', 
-            name='Ground Truth', 
-            line=dict(color='blue')
-        ))
-        fig.add_trace(go.Scatter(
-            x=predictions_df['published_date'], 
-            y=predictions_df[col], 
-            mode='lines+markers', 
-            name='Predicted', 
-            line=dict(color='orange')
-        ))
-        fig.update_layout(
-            title=f"Test Set: <b>{col}</b> (Ground Truth vs Predicted)",
-            xaxis_title="Published Date",
-            yaxis_title=col,
-            template="plotly_white"
-        )
-        
-        # Convert the figure to HTML
-        graph_html = pio.to_html(fig, full_html=False)
-        graphs.append(graph_html)
+def visualize_results(predictions_df, ground_truth_df):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=ground_truth_df['published_date'], 
+        y=ground_truth_df['close'], 
+        mode='lines+markers', 
+        name='Ground Truth', 
+        line=dict(color='blue')
+    ))
+    fig.add_trace(go.Scatter(
+        x=predictions_df['published_date'], 
+        y=predictions_df['close'], 
+        mode='lines+markers', 
+        name='Predicted', 
+        line=dict(color='orange')
+    ))
+    fig.update_layout(
+        title="Test Set: <b>Close</b> (Ground Truth vs Predicted)",
+        xaxis_title="Published Date",
+        yaxis_title="Close Price",
+        template="plotly_white"
+    )
     
-    return graphs
+    # Convert the figure to HTML
+    graph_html = pio.to_html(fig, full_html=False)
+    return graph_html
+
 
 def main(model_type):
+    #load the preprocessed graphs
+    trained_graphs_path = "../GNN/graphs/cb_nabil_wt.pt"
+    test_graphs_path = "../GNN/graphs/cb_nabil_wt_test.pt"
+    trained_graphs = torch.load(trained_graphs_path)
+    test_graphs = torch.load(test_grahs_path)
+
     # Load the data
     data_path = "../data/fundamental data/commercial bank/NABIL.csv"
     df = pd.read_csv(data_path)
     df = df.drop(columns=['published_date', 'status'])
     df['per_change'] = df["per_change"].fillna(0)
 
-    # Train-test split
-    train_size = int(len(df) * 0.8)
-    train_df = df[:train_size]
-    test_df = df[train_size:]
-
-    # Normalize the data
-    train_data = scaler.transform(train_df)
-    test_data = scaler.transform(test_df)
-
-    # Convert back to DataFrame
-    train_df = pd.DataFrame(train_data, columns=df.columns)
-    test_df = pd.DataFrame(test_data, columns=df.columns)
-
-    # Generate graphs for training, validation, and testing
-    train_graphs, val_graphs = pp.visibility_graph(
-        data=train_df, value="open", window_size=30, step_size=20
-    )
-
-    test_graphs = pp.test_visibility_graph(
-        data=test_df, value="open", window_size=30, step_size=20
-    )
-
+    #load the model
     input_size = 7  
     hidden_size = 64
     output_size = 7 
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model_path = "models/gcn.pth" if model_type == 'GCN' else "models/gat2.pth"
+    model_path = "../GNN/models/GCN_nabil.pth" if model_type == 'GCN' else '../GNN/models/GAT_nabil.pth'
     model = load_model(model_path, input_size, hidden_size, output_size, model_type)
-    model = model.to(device)
-    model.eval()
 
     # Generate predictions for the test set
     test_predictions_df, test_ground_truth_df = generate_predictions(model, test_graphs, df, model_type)
 
-    # Feature columns
-    feature_columns = ['open', 'high', 'low', 'close', 'per_change', 'traded_quantity', 'traded_amount']
-
     # Visualize the test set results
-    test_ground_truth_df = test_ground_truth_df[:-1]
-    graphs = visualize_results(test_predictions_df, test_ground_truth_df, feature_columns)
-    return graphs
+    graph_html = visualize_results(test_predictions_df, test_ground_truth_df)
+    return graph_html
 
 if __name__ == "__main__":
-    main('GCN')  # Default to GCN if run directly
+    graph_html = main('GCN')  # Default to GCN if run directly
+    print(graph_html)

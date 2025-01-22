@@ -9,7 +9,9 @@ from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy import create_engine, Column, String, Boolean, Integer, Float, inspect, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from predict import main as predict_main_nabil
+from models.NABIL_predict import main as predict_main_nabil
+from models.ADBL_predict import main as predict_main_adbl
+from models.NMB_predict import main as predict_main_nmb
 import bcrypt
 
 # Database setup

@@ -34,18 +34,18 @@ def prepare_stock(df, scaler):
     cols = df.columns
     data = scaler.transform(df)
     df = pd.DataFrame(data, columns=cols, index=og_index)
-    df = df[df.index < "2022-04-25"]
+    df = df[df.index > "2022-04-25"]
     return df
 
 
 def create_graphs(
     predictee,
     stocks,
+    graph_name,
     vis_col="close",
     window_size=30,
     step_size=20,
-    batch_size=32,
-    graph_name
+    batch_size=32
 ):
     graphs = gc.create_graphs(
         predictee, stocks, vis_col=vis_col, window_size=window_size, step_size=step_size, graph_name=graph_name

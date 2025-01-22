@@ -34,54 +34,12 @@
         <p class="text-muted">Blue: Ground Truth | Orange: Predicted Values</p>
     </div>
 
-    <!-- Prediction Graphs -->
+    <!-- Prediction Graph -->
     <div class="row">
-        <div class="col-md-6">
-            <!-- Graph 1: Open Price -->
-            <div id="graph1" class="graph-container" style="width: 100%; height: auto;">
-                {{ graphs[0] | safe }}
-            </div>
-        </div>
-        <div class="col-md-6">
-            <!-- Graph 2: High Price -->
-            <div id="graph2" class="graph-container" style="width: 100%; height: auto;">
-                {{ graphs[1] | safe }}
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <!-- Graph 3: Low Price -->
-            <div id="graph3" class="graph-container" style="width: 100%; height: auto;">
-                {{ graphs[2] | safe }}
-            </div>
-        </div>
-        <div class="col-md-6">
-            <!-- Graph 4: Close Price -->
-            <div id="graph4" class="graph-container" style="width: 100%; height: auto;">
-                {{ graphs[3] | safe }}
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <!-- Graph 5: Per_change -->
-            <div id="graph5" class="graph-container" style="width: 100%; height: auto;">
-                {{ graphs[4] | safe }}
-            </div>
-        </div>
-        <div class="col-md-6">
-            <!-- Graph 6: Traded Quantity -->
-            <div id="graph6" class="graph-container" style="width: 100%; height: auto;">
-                {{ graphs[5] | safe }}
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <!-- Graph 7: Traded Amount -->
-            <div id="graph7" class="graph-container" style="width: 100%; height: auto;">
-                {{ graphs[6] | safe }}
+        <div class="col-md-12">
+            <!-- Graph: Close Price -->
+            <div id="graph" class="graph-container" style="width: 100%; height: auto;">
+                {{ graph_html | safe }}
             </div>
         </div>
     </div>
