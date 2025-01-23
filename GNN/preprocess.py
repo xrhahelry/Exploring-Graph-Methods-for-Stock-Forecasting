@@ -38,7 +38,7 @@ def prepare_stock(df, scaler):
     cols = df.columns
     data = scaler.transform(df)
     df = pd.DataFrame(data, columns=cols, index=og_index)
-    df = df[df.index >= "2020-07-29"]
+    df = df[df.index < "2020-07-29"]
     return df
 
 

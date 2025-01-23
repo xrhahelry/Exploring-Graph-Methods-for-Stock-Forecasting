@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 import pandas as pd
-import models.preprocess as pp
 import models.nn as NN
 import joblib
 import matplotlib.pyplot as plt
@@ -29,8 +28,9 @@ def load_model(model_path, input_size, hidden_size, output_size, model_type):
     return model
 
 # Generate predictions
-def generate_predictions(model, graphs, df, model_type):
+def generate_predictions(model, graphs, model_type, df):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model=model.to(device)
     predictions = []
     ground_truth = []
     for batch in graphs:
@@ -69,39 +69,46 @@ def generate_predictions(model, graphs, df, model_type):
     return predictions_df, ground_truth_df
 
 def visualize_results(predictions_df, ground_truth_df):
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=ground_truth_df['published_date'], 
-        y=ground_truth_df['close'], 
-        mode='lines+markers', 
-        name='Ground Truth', 
-        line=dict(color='blue')
-    ))
-    fig.add_trace(go.Scatter(
-        x=predictions_df['published_date'], 
-        y=predictions_df['close'], 
-        mode='lines+markers', 
-        name='Predicted', 
-        line=dict(color='orange')
-    ))
-    fig.update_layout(
-        title="Test Set: <b>Close</b> (Ground Truth vs Predicted)",
-        xaxis_title="Published Date",
-        yaxis_title="Close Price",
-        template="plotly_white"
-    )
+    # Create a list to store all the graphs
+    graphs_html = []
     
-    # Convert the figure to HTML
-    graph_html = pio.to_html(fig, full_html=False)
-    return graph_html
+    # Iterate over each feature (column) except 'published_date'
+    for feature in predictions_df.columns:
+        if feature != 'published_date':
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=ground_truth_df['published_date'], 
+                y=ground_truth_df[feature], 
+                mode='lines+markers', 
+                name='Ground Truth', 
+                line=dict(color='blue')
+            ))
+            fig.add_trace(go.Scatter(
+                x=predictions_df['published_date'], 
+                y=predictions_df[feature], 
+                mode='lines+markers', 
+                name='Predicted', 
+                line=dict(color='orange')
+            ))
+            fig.update_layout(
+                title=f"Test Set: <b>{feature}</b> (Ground Truth vs Predicted)",
+                xaxis_title="Published Date",
+                yaxis_title=feature,
+                template="plotly_white"
+            )
+            
+            # Convert the figure to HTML and add it to the list
+            graph_html = pio.to_html(fig, full_html=False)
+            graphs_html.append(graph_html)
+    
+    return graphs_html
+
 
 
 def main(model_type):
     #load the preprocessed graphs
-    trained_graphs_path = "../GNN/graphs/cb_nabil_wt.pt"
-    test_graphs_path = "../GNN/graphs/cb_nabil_wt_test.pt"
-    trained_graphs = torch.load(trained_graphs_path)
-    test_graphs = torch.load(test_grahs_path)
+    test_graphs_path = "../GNN/graphs/cb_nabil_test.pt"
+    test_graphs = torch.load(test_graphs_path)
 
     # Load the data
     data_path = "../data/fundamental data/commercial bank/NABIL.csv"
@@ -111,14 +118,14 @@ def main(model_type):
 
     #load the model
     input_size = 7  
-    hidden_size = 64
+    hidden_size = 512
     output_size = 7 
 
-    model_path = "../GNN/models/GCN_nabil.pth" if model_type == 'GCN' else '../GNN/models/GAT_nabil.pth'
+    model_path = "../GNN/models/gcn_nabil.pth" if model_type == 'GCN' else '../GNN/models/gat_nabil.pth'
     model = load_model(model_path, input_size, hidden_size, output_size, model_type)
 
     # Generate predictions for the test set
-    test_predictions_df, test_ground_truth_df = generate_predictions(model, test_graphs, df, model_type)
+    test_predictions_df, test_ground_truth_df = generate_predictions(model, test_graphs, model_type, df)
 
     # Visualize the test set results
     graph_html = visualize_results(test_predictions_df, test_ground_truth_df)
@@ -126,4 +133,5 @@ def main(model_type):
 
 if __name__ == "__main__":
     graph_html = main('GCN')  # Default to GCN if run directly
-    print(graph_html)
+    for graph in graphs.html:
+        print(graph)

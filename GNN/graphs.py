@@ -9,7 +9,7 @@ def single():
     step_size = 3
     vis_col = "close"
     batch_size = 32
-    graph_name = "mrg_nib_test"
+    graph_name = "mrg_nib_wt"
 
     scaler = joblib.load("./scalers/mrg_nib.pkl")
     df = pd.read_csv("../data/fundamental data/merged share/NIB.csv")

@@ -15,8 +15,12 @@
                 <label for="bank">Select Bank:</label>
                 <select name="bank" id="bank" class="form-control" onchange="this.form.submit()">
                     <option value="NABIL" {% if bank == "NABIL" %}selected{% endif %}>NABIL</option>
-                    <option value="ADBL" {% if bank == "ADBL" %}selected{% endif %}>ADBL</option>
-                    <option value="NMB" {% if bank == "NMB" %}selected{% endif %}>NMB</option>
+                    <option value="ALICL" {% if bank == "ALICL" %}selected{% endif %}>ALICL</option>
+                    <option value="BPCL" {% if bank == "BPCL" %}selected{% endif %}>BPCL</option>
+                    <option value="CFCL" {% if bank == "CFCL" %}selected{% endif %}>CFCL</option>
+                    <option value="CIT" {% if bank == "CIT" %}selected{% endif %}>CIT</option>
+                    <option value="EDBL" {% if bank == "EDBL" %}selected{% endif %}>EDBL</option>
+                    <option value="SHL" {% if bank == "SHL" %}selected{% endif %}>SHL</option>
                 </select>
             </div>
             <div class="form-group">
@@ -34,13 +38,15 @@
         <p class="text-muted">Blue: Ground Truth | Orange: Predicted Values</p>
     </div>
 
-    <!-- Prediction Graph -->
+    <!-- Prediction Graphs -->
     <div class="row">
         <div class="col-md-12">
-            <!-- Graph: Close Price -->
-            <div id="graph" class="graph-container" style="width: 100%; height: auto;">
+            <!-- Loop through each graph HTML -->
+            {% for graph_html in graphs %}
+            <div class="graph-container mb-4" style="width: 100%; height: auto;">
                 {{ graph_html | safe }}
             </div>
+            {% endfor %}
         </div>
     </div>
 </div>

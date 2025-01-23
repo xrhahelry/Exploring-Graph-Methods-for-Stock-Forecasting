@@ -9,9 +9,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from sqlalchemy import create_engine, Column, String, Boolean, Integer, Float, inspect, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from models.NABIL_predict import main as predict_main_nabil
-from models.ADBL_predict import main as predict_main_adbl
-from models.NMB_predict import main as predict_main_nmb
+import importlib
 import bcrypt
 
 # Database setup
@@ -76,18 +74,27 @@ def get_tables():
     tables = inspector.get_table_names()
     return [table for table in tables if table != 'users']
 
+#List of Supported Banks
+SUPPORTED_BANKS = {
+    "NABIL": "NABIL_predict",
+    "ALICL": "ALICL_predict",
+    "BPCL": "BPCL_predict",
+    "CFCL": "CFCL_predict",
+    "CIT": "CIT_predict",
+    "EDBL": "EDBL_predict",
+    "SHL": "SHL_predict"
+}
+
 # Homepage
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request, model: str = 'GCN', bank: str = 'NABIL'):
     try:
-        if bank == 'NABIL':
-            graphs = predict_main_nabil(model)  
-        elif bank == 'ADBL':
-            graphs = predict_main_adbl(model) 
-        elif bank == 'NMB':
-            graphs = predict_main_nmb(model) 
-        else:
-            raise HTTPException(status_code=400, detail='Invalid bank specified')
+        if bank not in SUPPORTED_BANKS:
+            raise HTTPException(status_code=400, detail="Invalid bank specified")
+        
+        # Import the prediction module
+        prediction_module = importlib.import_module(f"models.{SUPPORTED_BANKS[bank]}")
+        graphs = prediction_module.main(model)  # Call the main function of the prediction module
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating predictions: {str(e)}")
     
