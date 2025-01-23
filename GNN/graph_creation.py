@@ -41,14 +41,9 @@ def create_graphs_singular(
         edge_index = temp.edge_index
 
         edge_index, _ = remove_self_loops(edge_index)
-        
-        # Add edge weights (absolute difference between node values)
-        edge_weight = torch.tensor([abs(vis[u] - vis[v]) for u, v in G.edges()], dtype=torch.float)
-        edge_weight = torch.cat([edge_weight, edge_weight])
-
-        print(f"Number of edges:  {len(G.edges())}")
-        print(f"Edges index shape:  {edge_index.shape}")
-        print(f"Edge weight shape:  {edge_weight.shape}")
+        edge_weight = torch.tensor(
+            [abs(vis[u] - vis[v]) for u, v in G.edges() if u != v], dtype=torch.float
+        )
 
         x = torch.tensor(frame, dtype=torch.float)
         y = torch.tensor(target, dtype=torch.float)
@@ -58,8 +53,16 @@ def create_graphs_singular(
     torch.save(graphs, f"./graphs/{graph_name}.pt")
     return graphs
 
+
 @track_execution
-def create_graphs(predictee, stocks, vis_col="close", window_size=30, step_size=20, graph_name="graphs.pt"):
+def create_graphs(
+    predictee,
+    stocks,
+    vis_col="close",
+    window_size=30,
+    step_size=20,
+    graph_name="graphs.pt",
+):
     l = len(predictee)
     predict_frames = []
     predict_dates = predictee.index
@@ -83,7 +86,7 @@ def create_graphs(predictee, stocks, vis_col="close", window_size=30, step_size=
                 frame = frame[frame.index <= end_date]
 
                 temp = stock[stock.index > end_date]
-                temp = temp[temp.index <= end_date + pd.DateOffset(days=7)]
+                temp = temp[temp.index <= end_date + pd.DateOffset(days=30)]
 
                 if not temp["close"].empty:
                     t = frame["close"].to_list()

@@ -9,10 +9,10 @@ def single():
     step_size = 3
     vis_col = "close"
     batch_size = 32
-    graph_name = "cb_nabil_wt_test"
+    graph_name = "mrg_nib_test"
 
-    scaler = joblib.load("./scalers/cb_nabil.pkl")
-    df = pd.read_csv("../data/fundamental data/commercial bank/NABIL.csv")
+    scaler = joblib.load("./scalers/mrg_nib.pkl")
+    df = pd.read_csv("../data/fundamental data/merged share/NIB.csv")
     df = pp.prepare_stock(df, scaler)
 
     gc.create_graphs_singular(df, vis_col, window_size, step_size, graph_name=graph_name)
