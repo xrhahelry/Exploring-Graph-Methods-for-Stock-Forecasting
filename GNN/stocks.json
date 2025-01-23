@@ -18,7 +18,7 @@
     "fundamental data/commercial bank/SANIMA.csv",
     "fundamental data/commercial bank/SBI.csv"
   ],
-  "hydro_predict": "fundamental data/hydro/BPCL.csv",
+  "hydro_predict": "fundamental data/hydro/CHCL.csv",
   "hydro": [
     "fundamental data/hydro/SAHAS.csv",
     "fundamental data/hydro/NHPC.csv",
@@ -54,7 +54,7 @@
     "fundamental data/hydro/BARUN.csv",
     "fundamental data/hydro/CHL.csv",
     "fundamental data/hydro/SJCL.csv",
-    "fundamental data/hydro/CHCL.csv",
+    "fundamental data/hydro/BPCL.csv",
     "fundamental data/hydro/AKJCL.csv",
     "fundamental data/hydro/PMHPL.csv",
     "fundamental data/hydro/SHEL.csv",
@@ -62,10 +62,11 @@
     "fundamental data/hydro/KPCL.csv",
     "fundamental data/hydro/GHL.csv"
   ],
-  "finance_predict": "fundamental data/finance/CFCL.csv",
+  "finance_predict": "fundamental data/finance/ICFC.csv",
   "finance": [
     "fundamental data/finance/MPFL.csv",
     "fundamental data/finance/GMFIL.csv",
+    "fundamental data/finance/CFCL.csv",
     "fundamental data/finance/JFL.csv",
     "fundamental data/finance/NFS.csv",
     "fundamental data/finance/SFCL.csv",
@@ -76,13 +77,12 @@
     "fundamental data/finance/BFC.csv",
     "fundamental data/finance/PFL.csv",
     "fundamental data/finance/GUFL.csv",
-    "fundamental data/finance/ICFC.csv",
     "fundamental data/finance/RLFL.csv"
   ],
-  "hnt_predict": "fundamental data/hotel and tourism/SHL.csv",
+  "hnt_predict": "fundamental data/hotel and tourism/OHL.csv",
   "hnt": [
     "fundamental data/hotel and tourism/TRH.csv",
-    "fundamental data/hotel and tourism/OHL.csv",
+    "fundamental data/hotel and tourism/SHL.csv",
     "fundamental data/hotel and tourism/CGH.csv"
   ],
   "lf_predict": "fundamental data/life insurance/ALICL.csv",
@@ -98,7 +98,7 @@
     "fundamental data/investment/HIDCL.csv",
     "fundamental data/investment/CHDC.csv"
   ],
-  "dev_predict": "fundamental data/development bank/EDBL.csv",
+  "dev_predict": "fundamental data/development bank/JBBL.csv",
   "dev": [
     "fundamental data/development bank/MDB.csv",
     "fundamental data/development bank/MNBBL.csv",
@@ -113,7 +113,7 @@
     "fundamental data/development bank/SADBL.csv",
     "fundamental data/development bank/KRBL.csv",
     "fundamental data/development bank/MLBL.csv",
-    "fundamental data/development bank/JBBL.csv",
+    "fundamental data/development bank/EDBL.csv",
     "fundamental data/development bank/SHINE.csv"
   ],
   "stocks": [

@@ -85,7 +85,8 @@ def create_graphs_singular_with_edge_weights(
         edge_index, _ = remove_self_loops(edge_index)
         # Fix: Assign edge weights only for unique edges
         edge_weight = torch.tensor(
-            [abs(vis[u] - vis[v]) for u, v in zip(edge_index[0], edge_index[1])], dtype=torch.float
+            [abs(vis[u] - vis[v]) for u, v in zip(edge_index[0], edge_index[1])],
+            dtype=torch.float,
         )
         print(edge_index.shape)
         print(edge_weight.shape)
@@ -105,7 +106,7 @@ def create_graphs(
     vis_col="close",
     window_size=30,
     step_size=20,
-    graph_name="graphs.pt",
+    graph_name="graphs",
 ):
     l = len(predictee)
     predict_frames = []
@@ -120,7 +121,7 @@ def create_graphs(
         if end >= l:
             temp_frame = predictee[l - window_size - 1 : l - 1]
             predict_frames.append(temp_frame)
-            t = temp_frame[l]["close"]
+            t = predictee.iloc[l - 1]["close"]
             predict_values.append(t)
             start_date = predict_dates[l - window_size - 1]
             end_date = predict_dates[l - 2]
@@ -133,7 +134,7 @@ def create_graphs(
                 temp = temp[temp.index <= end_date + pd.DateOffset(days=30)]
 
                 if not temp["close"].empty:
-                    t = frame["close"].to_list()
+                    t = temp["close"].to_list()
                     predict_values.append(t[0])
                 else:
                     predict_values.append(0)
@@ -159,7 +160,7 @@ def create_graphs(
             temp = temp[temp.index <= end_date + pd.DateOffset(days=30)]
 
             if not temp["close"].empty:
-                t = frame["close"].to_list()
+                t = temp["close"].to_list()
                 predict_values.append(t[0])
             else:
                 predict_values.append(0)
@@ -268,7 +269,7 @@ def create_graphs_with_edge_weights(
         if end >= l:
             temp_frame = predictee[l - window_size - 1 : l - 1]
             predict_frames.append(temp_frame)
-            t = temp_frame[l]["close"]
+            t = predictee.iloc[l - 1]["close"]
             predict_values.append(t)
             start_date = predict_dates[l - window_size - 1]
             end_date = predict_dates[l - 2]
@@ -281,7 +282,7 @@ def create_graphs_with_edge_weights(
                 temp = temp[temp.index <= end_date + pd.DateOffset(days=30)]
 
                 if not temp["close"].empty:
-                    t = frame["close"].to_list()
+                    t = temp["close"].to_list()
                     predict_values.append(t[0])
                 else:
                     predict_values.append(0)
@@ -307,7 +308,7 @@ def create_graphs_with_edge_weights(
             temp = temp[temp.index <= end_date + pd.DateOffset(days=30)]
 
             if not temp["close"].empty:
-                t = frame["close"].to_list()
+                t = temp["close"].to_list()
                 predict_values.append(t[0])
             else:
                 predict_values.append(0)
@@ -320,6 +321,16 @@ def create_graphs_with_edge_weights(
         from_networkx(nx.visibility_graph(frame[vis_col])).edge_index.to(torch.int64)
         for frame in predict_frames
     ]
+    predict_vis_col = [frame[vis_col].to_list() for frame in predict_frames]
+    predict_edge_weights = []
+
+    for i, edge_index in enumerate(predict_edge_indexes):
+        temp_edge_weight = [
+            abs(predict_vis_col[i][u] - predict_vis_col[i][v])
+            for u, v in zip(edge_index[0], edge_index[1])
+        ]
+        predict_edge_weights.append(temp_edge_weight)
+
     predict_frame_dates = [
         frame.index.strftime("%Y%m%d").astype(int).tolist() for frame in predict_frames
     ]
@@ -330,6 +341,21 @@ def create_graphs_with_edge_weights(
         ]
         for frames in stocks_frames
     ]
+    stocks_vis_cols = [
+        [frame[vis_col].to_list() for frame in frames] for frames in stocks_frames
+    ]
+    stocks_edge_weights = []
+
+    for i, edge_indexes in enumerate(stocks_edge_indexes):
+        temp = []
+        for j, edge_index in enumerate(edge_indexes):
+            temp_edge_weight = [
+                abs(stocks_vis_cols[i][j][u] - stocks_vis_cols[i][j][v])
+                for u, v in zip(edge_index[0], edge_index[1])
+            ]
+            temp.append(temp_edge_weight)
+        stocks_edge_weights.append(temp)
+
     stocks_frames_dates = [
         [frame.index.strftime("%Y%m%d").astype(int).tolist() for frame in frames]
         for frames in stocks_frames
@@ -340,18 +366,28 @@ def create_graphs_with_edge_weights(
         main_x = torch.tensor(predict_frames[i].values, dtype=torch.float)
         main_dates = torch.tensor(predict_frame_dates[i], dtype=torch.int)
         main_edge_index = predict_edge_indexes[i]
+        main_edge_weights = torch.tensor(predict_edge_weights[i], dtype=torch.int)
         main_y = torch.tensor(targets[i], dtype=torch.float)
         main_graph = Data(
-            x=main_x, edge_index=main_edge_index, y=main_y, dates=main_dates
+            x=main_x,
+            edge_index=main_edge_index,
+            edge_weight=main_edge_weights,
+            y=main_y,
+            dates=main_dates,
         )
         offset = main_graph.x.size(0)
+        offset_edge = main_graph.edge_weight.size(0)
 
         for j in range(len(stocks_frames[i])):
             stock_x = torch.tensor(stocks_frames[i][j].values, dtype=torch.float)
             stock_dates = torch.tensor(stocks_frames_dates[i][j], dtype=torch.int)
             stock_edge_index = stocks_edge_indexes[i][j]
+            stock_edge_weight = stocks_edge_weights[i][j]
             stock_graph = Data(
-                x=stock_x, edge_index=stock_edge_index, dates=stock_dates
+                x=stock_x,
+                edge_index=stock_edge_index,
+                edge_weight=stock_edge_weight,
+                dates=stock_dates,
             )
 
             common_dates_mask = torch.isin(main_dates, stock_dates)
@@ -370,6 +406,7 @@ def create_graphs_with_edge_weights(
             new_edge_index = (
                 torch.tensor(new_edge_index, dtype=torch.int).t().contiguous()
             )
+            new_edge_weights = torch.zeros(new_edge_index.shape[1], dtype=torch.int)
             main_x = torch.cat([main_graph.x, stock_graph.x], dim=0)
             main_dates = torch.cat([main_graph.dates, stock_graph.dates], dim=0)
 
@@ -381,11 +418,18 @@ def create_graphs_with_edge_weights(
                 ],
                 dim=1,
             )
+            main_edge_weight = torch.cat(
+                [main_graph.edge_weight, stock_graph.edge_weight, new_edge_weights]
+            )
 
             offset += stock_graph.x.size(0)
 
             main_graph = Data(
-                x=main_x, edge_index=main_edge_index, y=main_y, dates=main_dates
+                x=main_x,
+                edge_index=main_edge_index,
+                edge_weights=main_edge_weight,
+                y=main_y,
+                dates=main_dates,
             )
 
         graphs.append(main_graph)
