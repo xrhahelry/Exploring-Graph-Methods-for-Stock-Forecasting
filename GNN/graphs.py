@@ -1,3 +1,4 @@
+import json
 import graph_creation as gc
 import joblib
 import pandas as pd
@@ -17,17 +18,17 @@ def single():
 
     gc.create_graphs_singular(df, vis_col, window_size, step_size, graph_name=graph_name)
 
+
 def sector():
-    make_new_graph = True
     window_size = 30
     step_size = 3
     vis_col = "close"
-    graph_name = "comm_bank"
+    graph_name = "comm"
 
     with open("./GNN/stocks.json") as json_file:
         stock_paths = json.load(json_file)
-        predict_path = stock_paths["predict"]
-        other_paths = stock_paths["other"]
+        predict_path = stock_paths["comm_predict"]
+        other_paths = stock_paths["comm"]
 
     predictee = pd.read_csv(f"./data/{predict_path}")
     stocks = [pd.read_csv(f"./data/{path}") for path in other_paths]
@@ -45,8 +46,8 @@ def sector():
         vis_col=vis_col,
         window_size=window_size,
         step_size=step_size,
-        
+        graph_name=graph_name,
     )
 
-if __name__=="__main__":
-    single()
+
+sector()
