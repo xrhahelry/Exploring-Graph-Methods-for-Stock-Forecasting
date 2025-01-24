@@ -11,6 +11,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import importlib
 import bcrypt
+from models.FIN_predict import main as fin_predict_main 
+from models.COMM_predict import main as comm_predict_main
 
 # Database setup
 DATABASE_URL = "sqlite:///./test.db"
@@ -99,6 +101,24 @@ async def read_root(request: Request, model: str = 'GCN', bank: str = 'NABIL'):
         raise HTTPException(status_code=500, detail=f"Error generating predictions: {str(e)}")
     
     return templates.TemplateResponse("home.html", {"request": request, "graphs": graphs, "model": model, "bank": bank})
+
+#List of Sectors
+SUPPORTED_SECTORS = {
+    "Finance": "FIN_predict",
+    "Commercial": "COMM_predict"
+}
+# Sector Page
+@app.get("/sector", response_class=HTMLResponse)
+async def read_root(request: Request, sector:str = "Finance"):
+    try:
+        if sector not in SUPPORTED_SECTORS:
+            raise HTTPException(status_code=400, detail="Invalid sector specified")
+        
+        prediction_module = importlib.import_module(f"models.{SUPPORTED_SECTORS[sector]}")
+        graphs = prediction_module.main()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating sector predictions: {str(e)}")
+    return templates.TemplateResponse("sector.html", {"request":request, "graphs": graphs, "sector": sector})
 
 # NEPSE Data page
 @app.get("/nepse-data", response_class=HTMLResponse)

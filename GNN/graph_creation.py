@@ -83,7 +83,7 @@ def create_graphs_singular_with_edge_weights(
         edge_index = temp.edge_index
 
         edge_index, _ = remove_self_loops(edge_index)
-        # Fix: Assign edge weights only for unique edges
+        # Assign edge weights only for unique edges
         edge_weight = torch.tensor(
             [abs(vis[u] - vis[v]) for u, v in zip(edge_index[0], edge_index[1])],
             dtype=torch.float,

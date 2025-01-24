@@ -77,8 +77,8 @@ def visualize_results(predictions_df, ground_truth_df):
         if feature != 'published_date':
             fig = go.Figure()
             fig.add_trace(go.Scatter(
-                x=ground_truth_df['published_date'], 
-                y=ground_truth_df[feature], 
+                x=ground_truth_df['published_date'][:-2], 
+                y=ground_truth_df[feature][:-2], 
                 mode='lines+markers', 
                 name='Ground Truth', 
                 line=dict(color='blue')
@@ -107,7 +107,7 @@ def visualize_results(predictions_df, ground_truth_df):
 
 def main(model_type):
     #load the preprocessed graphs
-    test_graphs_path = "../GNN/graphs/inv_cit_test.pt"
+    test_graphs_path = "../GNN/graphs/test_graphs/inv_cit_test.pt"
     test_graphs = torch.load(test_graphs_path)
 
     # Load the data

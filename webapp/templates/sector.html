@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Sector-Wise Predictions{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Date and Time Section -->
+    <div class="text-left mb-4">
+        <h1>Sector-Wise Stock Prediction</h1>
+        
+        <!-- Form to select sector -->
+        <form method="get" action="/sector">
+            <div class="form-group">
+                <label for="sector">Select Sector:</label>
+                <select name="sector" id="sector" class="form-control" onchange="this.form.submit()">
+                    <option value="Finance" {% if sector == "Finance" %}selected{% endif %}>Finance</option>
+                    <option value="Commercial" {% if sector == "Commercial" %}selected{% endif %}>Commercial</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- Legend for Graph Colors -->
+    <div class="text-center mb-4">
+        <p class="text-muted">Blue: Ground Truth | Orange: Predicted Values</p>
+    </div>
+
+    <!-- Prediction Graphs -->
+    <div class="row">
+        <div class="col-md-12">
+            {% for graph_html in graphs %}
+            <div class="graph-container mb-4" style="width: 100%; height: auto;">
+                {{ graph_html | safe }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Include custom JavaScript -->
+<script src="{{ url_for('static', path='scripts.js') }}"></script>
+{% endblock %}
