@@ -22,7 +22,7 @@ def load_model(model_path, input_size, hidden_size, output_size, model_type):
         model = NN.GAT(input_size, hidden_size, output_size)
     else:
         raise ValueError("Invalid model type specified")
-    
+
     model.load_state_dict(torch.load(model_path))
     model.eval()
     return model
@@ -42,52 +42,52 @@ def generate_predictions(model, graphs, model_type, df):
                 output = model(batch.x, batch.edge_index, batch.edge_weight, batch.batch)
             else:
                 raise ValueError("Invalid model type specified")
-            
+
             output = output.view(-1)
             predictions.append(output.cpu().numpy())
             ground_truth.append(batch.y.cpu().numpy())
-    
+
     predictions = np.concatenate(predictions, axis=0)
     ground_truth = np.concatenate(ground_truth, axis=0)
-    
+
     # Reshape to match the original feature dimensions
     predictions = predictions.reshape(-1, 7)
     ground_truth = ground_truth.reshape(-1, 7)
-    
+
     # Inverse transform to the original scale
     predictions_original = scaler.inverse_transform(predictions)
     ground_truth_original = scaler.inverse_transform(ground_truth)
-    
+
     # Convert to DataFrames
     predictions_df = pd.DataFrame(predictions_original, columns=df.columns)
     ground_truth_df = pd.DataFrame(ground_truth_original, columns=df.columns)
-    
+
     # Add a 'published_date' column for plotting
     predictions_df['published_date'] = np.arange(len(predictions_df))
     ground_truth_df['published_date'] = np.arange(len(ground_truth_df))
-    
+
     return predictions_df, ground_truth_df
 
 def visualize_results(predictions_df, ground_truth_df):
     # Create a list to store all the graphs
     graphs_html = []
-    
+
     # Iterate over each feature (column) except 'published_date'
     for feature in predictions_df.columns:
         if feature != 'published_date':
             fig = go.Figure()
             fig.add_trace(go.Scatter(
-                x=ground_truth_df['published_date'][:-2], 
-                y=ground_truth_df[feature][:-2], 
-                mode='lines+markers', 
-                name='Ground Truth', 
+                x=ground_truth_df['published_date'],
+                y=ground_truth_df[feature],
+                mode='lines+markers',
+                name='Ground Truth',
                 line=dict(color='blue')
             ))
             fig.add_trace(go.Scatter(
-                x=predictions_df['published_date'], 
-                y=predictions_df[feature], 
-                mode='lines+markers', 
-                name='Predicted', 
+                x=predictions_df['published_date'],
+                y=predictions_df[feature],
+                mode='lines+markers',
+                name='Predicted',
                 line=dict(color='orange')
             ))
             fig.update_layout(
@@ -96,11 +96,11 @@ def visualize_results(predictions_df, ground_truth_df):
                 yaxis_title=feature,
                 template="plotly_white"
             )
-            
+
             # Convert the figure to HTML and add it to the list
             graph_html = pio.to_html(fig, full_html=False)
             graphs_html.append(graph_html)
-    
+
     return graphs_html
 
 
@@ -117,9 +117,9 @@ def main(model_type):
     df['per_change'] = df["per_change"].fillna(0)
 
     #load the model
-    input_size = 7  
+    input_size = 7
     hidden_size = 512
-    output_size = 7 
+    output_size = 7
 
     model_path = "../GNN/models/gcn_alicl.pth" if model_type == 'GCN' else '../GNN/models/gat_alicl.pth'
     model = load_model(model_path, input_size, hidden_size, output_size, model_type)
